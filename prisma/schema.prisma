@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model ADMIN { 
+  idADMIN             Int       @id 
+  nombre              String
+  email               String    @unique
+  password            String
+}
+
+
+
+model REDES {
+  idREDES             Int          @id @default(autoincrement())
+  nombre              String       @db.VarChar(50)
+  descripcion         String       @db.VarChar(500)
+
+    programas         PROGRAMA[]
+}
+
+
+
+model CENTRO {
+  idCENTRO            Int @id @default(autoincrement())
+  descripcion         String @db.VarChar(500)
+
+    ambientes         AMBIENTE[]
+    programas         PROGRAMA[]
+}
+
+
+
+model AMBIENTE {
+  idAMBIENTE          Int     @id @default(autoincrement())
+  descripcion         String  @db.VarChar(500)
+  caracteristicas     String @db.VarChar(500)
+
+    centroId          Int
+    centro            CENTRO @relation(fields: [centroId], references: [idCENTRO])
+}
+
+
+
+model PROGRAMA {
+  idPROGRAMA          Int      @id @default(autoincrement())
+  nivel               String   @db.VarChar(50)
+  nombre              String   @db.VarChar(50)
+  descripcion         String   @db.VarChar(500)
+
+    recomendaciones   RECOMENDACION[]
+
+    redesid           Int
+    redes             REDES   @relation(fields: [redesid], references: [idREDES])
+
+    centroId          Int
+    centro            CENTRO @relation(fields: [centroId], references: [idCENTRO])
+  
+}
+
+
+
+model RECOMENDACION {
+  idRECOMENDACION     Int      @id @default(autoincrement())
+  nombre              String   @db.VarChar(50)
+  descripcion         String   @db.VarChar(500)
+
+    programaId        Int
+    programa          PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
+
+    reporteId         Int
+    reporte           REPORTE @relation(fields: [reporteId], references: [idREPORTE])
+}
+
+
+
+model ASPIRANTE {
+  idASPIRANTE         Int     @id
+  nombre_completo     String  @db.VarChar(50)
+  email               String  @db.VarChar(50)
+  telefono            String  @db.VarChar(10)
+  password            String 
+
+    reportes          REPORTE[]
+    respuestas_Asp    RESPUESTAS_ASPIRANTE[]
+}
+
+
+
+model TEST {
+  idTEST              Int     @id @default(autoincrement())
+  descripcion         String  @db.VarChar(500)
+
+    reporte           REPORTE[]
+    preguntas         PREGUNTAS[]
+    respuestas_Asp    RESPUESTAS_ASPIRANTE[]
+}
+
+
+
+model REPORTE {
+  idREPORTE           Int      @id @default(autoincrement())
+  Fecha               DateTime
+
+    testId            Int  @unique
+    test              TEST @relation(fields: [testId], references: [idTEST])
+
+    aspiranteId       Int
+    aspirante         ASPIRANTE @relation(fields: [aspiranteId], references: [idASPIRANTE])
+
+    respuestas_Asp    RESPUESTAS_ASPIRANTE[]
+    recomendaciones   RECOMENDACION[]
+}
+
+
+
+model PREGUNTAS {
+  idPREGUNTAS         Int      @id @default(autoincrement())
+  descripcion         String   @db.VarChar(500)
+
+    testId            Int
+    test              TEST    @relation(fields: [testId], references: [idTEST])
+
+    respuestas        RESPUESTAS[]
+    respuestas_Asp    RESPUESTAS_ASPIRANTE[]
+}
+
+
+
+model RESPUESTAS {
+  idRESPUESTAS        Int      @id @default(autoincrement())
+  descripcion         String   @db.VarChar(500)
+
+    preguntaId        Int
+    pregunta          PREGUNTAS @relation(fields: [preguntaId], references: [idPREGUNTAS])
+
+    respuestas_Asp    RESPUESTAS_ASPIRANTE[]
+}
+
+
+
+model RESPUESTAS_ASPIRANTE {
+  idRESPUESTASASP     Int      @id @default(autoincrement())
+
+    aspiranteId       Int
+    aspirante         ASPIRANTE @relation(fields: [aspiranteId], references: [idASPIRANTE])
+
+    testId            Int
+    test              TEST    @relation(fields: [testId], references: [idTEST])
+
+    preguntaId        Int
+    pregunta          PREGUNTAS @relation(fields: [preguntaId], references: [idPREGUNTAS])
+
+    respuestaId       Int
+    respuesta         RESPUESTAS @relation(fields: [respuestaId], references: [idRESPUESTAS])
+
+    reporteId         Int
+    reporte           REPORTE @relation(fields: [reporteId], references: [idREPORTE])
+}
