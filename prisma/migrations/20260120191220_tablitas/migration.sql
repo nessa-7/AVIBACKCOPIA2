@@ -85,7 +85,6 @@ CREATE TABLE `REPORTE` (
     `testId` INTEGER NOT NULL,
     `aspiranteId` INTEGER NOT NULL,
 
-    UNIQUE INDEX `REPORTE_testId_key`(`testId`),
     PRIMARY KEY (`idREPORTE`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

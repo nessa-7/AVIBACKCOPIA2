@@ -115,7 +115,7 @@ model REPORTE {
   idREPORTE           Int      @id @default(autoincrement())
   Fecha               DateTime
 
-    testId            Int  @unique
+    testId            Int  
     test              TEST @relation(fields: [testId], references: [idTEST])
 
     aspiranteId       Int

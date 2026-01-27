@@ -7,6 +7,7 @@ const ProgramasRoutes = require("./routes/programasRoutes")
 const PerfilRoutes = require("./routes/PerfilRoutes")
 const AspiranteRoutes = require("./routes/AspiranteRoutes")
 const AdminRoutes = require("./routes/AdminRoutes")
+const EstadisticasRoutes = require("./routes/EstadisticasRouter")
 
 const cors = require("cors")
 const bcrypt = require("bcryptjs")
@@ -21,7 +22,7 @@ app.use(cors({
 }));
 
 app.use(express.json())
-app.use('/api',authRoutes,PreguntasRoutes,RespuestaRoutes,ProgramasRoutes,PerfilRoutes,AspiranteRoutes,AdminRoutes)
+app.use('/api',authRoutes,PreguntasRoutes,RespuestaRoutes,ProgramasRoutes,PerfilRoutes,AspiranteRoutes,AdminRoutes, EstadisticasRoutes)
 
 
 app.listen(4000, () => {
