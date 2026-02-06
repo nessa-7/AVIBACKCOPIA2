@@ -65,6 +65,8 @@ CREATE TABLE `ASPIRANTE` (
     `nombre_completo` VARCHAR(50) NOT NULL,
     `email` VARCHAR(50) NOT NULL,
     `telefono` VARCHAR(10) NOT NULL,
+    `barrio` VARCHAR(100) NULL,
+    `direccion` VARCHAR(100) NULL,
     `password` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`idASPIRANTE`)

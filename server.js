@@ -16,7 +16,7 @@ const prisma = new PrismaClient()
 
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: '*',
     methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type','Authorization']
 }));
@@ -25,6 +25,9 @@ app.use(express.json())
 app.use('/api',authRoutes,PreguntasRoutes,RespuestaRoutes,ProgramasRoutes,PerfilRoutes,AspiranteRoutes,AdminRoutes, EstadisticasRoutes)
 
 
-app.listen(4000, () => {
-    console.log('Servidor ejecutando puerto 4000')
-})
+
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en ${PORT}`);
+});

@@ -92,6 +92,8 @@ model ASPIRANTE {
   nombre_completo     String  @db.VarChar(50)
   email               String  @db.VarChar(50)
   telefono            String  @db.VarChar(10)
+  barrio              String?  @db.VarChar(100)
+  direccion           String?  @db.VarChar(100)
   password            String 
 
     reportes          REPORTE[]
