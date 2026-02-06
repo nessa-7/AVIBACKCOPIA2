@@ -52,7 +52,7 @@ const authService = {
             }
             const token = jwt.sign(
                 { id: aspirante.idASPIRANTE, nombre_completo: aspirante.nombre_completo, rol: "aspirante"},
-                "JWT_SECRET",
+                 process.env.JWT_SECRET,
                 { expiresIn: "2h"}
             )
             return {user: aspirante, token, rol: "aspirante"}
