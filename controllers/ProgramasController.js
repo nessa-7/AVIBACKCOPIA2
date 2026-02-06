@@ -1,4 +1,4 @@
-const ProgramasService = require('../services/ProgramasService');
+const ProgramasService = require('../services/ProgramaService');
 
 const ProgramasController = {
 

@@ -1,10 +1,10 @@
 const { PrismaClient } = require("@prisma/client")
 const prisma = new PrismaClient()
 
-const ProgramasService = {
+const ProgramaService = {
   async traerProgramas() {
     return await prisma.PROGRAMA.findMany();
   }
 };
 
-module.exports = ProgramasService;
+module.exports = ProgramaService;
