@@ -60,6 +60,8 @@ model PROGRAMA {
   nivel               String   @db.VarChar(50)
   nombre              String   @db.VarChar(50)
   descripcion         String   @db.VarChar(500)
+  perfilRIASEC        String?  @db.VarChar(10)
+
 
     recomendaciones   RECOMENDACION[]
 
@@ -115,7 +117,14 @@ model TEST {
 
 model REPORTE {
   idREPORTE           Int      @id @default(autoincrement())
-  Fecha               DateTime
+  Fecha               DateTime @default(now())
+  puntajeR            Int      @default(0)
+  puntajeI            Int      @default(0)
+  puntajeA            Int      @default(0)
+  puntajeS            Int      @default(0)
+  puntajeE            Int      @default(0)
+  puntajeC            Int      @default(0)
+
 
     testId            Int  
     test              TEST @relation(fields: [testId], references: [idTEST])
@@ -132,6 +141,9 @@ model REPORTE {
 model PREGUNTAS {
   idPREGUNTAS         Int      @id @default(autoincrement())
   descripcion         String   @db.VarChar(500)
+  perfilesRIASEC      String?  @db.VarChar(50)
+  generadaIA          Boolean  @default(true)
+
 
     testId            Int
     test              TEST    @relation(fields: [testId], references: [idTEST])
