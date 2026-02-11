@@ -19,6 +19,7 @@ model ADMIN {
   idADMIN             Int       @id 
   nombre              String
   email               String    @unique
+  activo              Boolean @default(true)
   password            String
 }
 
@@ -96,6 +97,7 @@ model ASPIRANTE {
   telefono            String  @db.VarChar(10)
   barrio              String?  @db.VarChar(100)
   direccion           String?  @db.VarChar(100)
+  activo              Boolean  @default(true)
   password            String 
 
     reportes          REPORTE[]
