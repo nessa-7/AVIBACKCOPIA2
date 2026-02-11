@@ -108,11 +108,11 @@ model ASPIRANTE {
 
 model TEST {
   idTEST              Int     @id @default(autoincrement())
+  nombre              String?
   descripcion         String  @db.VarChar(500)
 
     reporte           REPORTE[]
     preguntas         PREGUNTAS[]
-    respuestas_Asp    RESPUESTAS_ASPIRANTE[]
 }
 
 
@@ -150,19 +150,6 @@ model PREGUNTAS {
     testId            Int
     test              TEST    @relation(fields: [testId], references: [idTEST])
 
-    respuestas        RESPUESTAS[]
-    respuestas_Asp    RESPUESTAS_ASPIRANTE[]
-}
-
-
-
-model RESPUESTAS {
-  idRESPUESTAS        Int      @id @default(autoincrement())
-  descripcion         String   @db.VarChar(500)
-
-    preguntaId        Int
-    pregunta          PREGUNTAS @relation(fields: [preguntaId], references: [idPREGUNTAS])
-
     respuestas_Asp    RESPUESTAS_ASPIRANTE[]
 }
 
@@ -171,17 +158,13 @@ model RESPUESTAS {
 model RESPUESTAS_ASPIRANTE {
   idRESPUESTASASP     Int      @id @default(autoincrement())
 
+  valor               Int
+
     aspiranteId       Int
     aspirante         ASPIRANTE @relation(fields: [aspiranteId], references: [idASPIRANTE])
 
-    testId            Int
-    test              TEST    @relation(fields: [testId], references: [idTEST])
-
     preguntaId        Int
     pregunta          PREGUNTAS @relation(fields: [preguntaId], references: [idPREGUNTAS])
-
-    respuestaId       Int
-    respuesta         RESPUESTAS @relation(fields: [respuestaId], references: [idRESPUESTAS])
 
     reporteId         Int
     reporte           REPORTE @relation(fields: [reporteId], references: [idREPORTE])
