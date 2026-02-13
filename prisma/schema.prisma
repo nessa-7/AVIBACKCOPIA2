@@ -21,6 +21,7 @@ model ADMIN {
   email               String    @unique
   activo              Boolean @default(true)
   password            String
+  foto                String? 
 }
 
 
@@ -99,6 +100,7 @@ model ASPIRANTE {
   direccion           String?  @db.VarChar(100)
   activo              Boolean  @default(true)
   password            String 
+  foto                String? 
 
     reportes          REPORTE[]
     respuestas_Asp    RESPUESTAS_ASPIRANTE[]
