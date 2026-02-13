@@ -8,12 +8,12 @@ const jwt = require("jsonwebtoken")
 const authService = {
 
     async registeraspirante(data){
-        const {idASPIRANTE,nombre_completo,email,telefono,password}=data
+        const {idASPIRANTE,nombre_completo,email,telefono,barrio,direccion,password}=data
 
         //encriptar password
         const datoencriptado = await bcrypt.hash(password,10)
         const nuevoaspirante = await prisma.aSPIRANTE.create({data:
-            {idASPIRANTE,nombre_completo,email,telefono,password:datoencriptado}
+            {idASPIRANTE,nombre_completo,email,telefono,barrio,direccion,password:datoencriptado}
         })
 
         return nuevoaspirante
@@ -75,7 +75,7 @@ const authService = {
             }
             const token = jwt.sign(
                 { id: admin.idADMIN, rol: "admin"},
-                "JWT_SECRET",
+                 process.env.JWT_SECRET,
                 { expiresIn: "2h"}
             )
             return {user: admin, token, rol: "admin"}
