@@ -19,19 +19,9 @@ model ADMIN {
   idADMIN             Int       @id 
   nombre              String
   email               String    @unique
-  activo              Boolean @default(true)
+  activo              Boolean   @default(true)
   password            String
   foto                String? 
-}
-
-
-
-model REDES {
-  idREDES             Int          @id @default(autoincrement())
-  nombre              String       @db.VarChar(50)
-  descripcion         String       @db.VarChar(500)
-
-    programas         PROGRAMA[]
 }
 
 
@@ -62,13 +52,10 @@ model PROGRAMA {
   nivel               String   @db.VarChar(50)
   nombre              String   @db.VarChar(50)
   descripcion         String   @db.VarChar(500)
-  perfilRIASEC        String?  @db.VarChar(10)
+  activo              Boolean @default(true)
 
 
     recomendaciones   RECOMENDACION[]
-
-    redesid           Int
-    redes             REDES   @relation(fields: [redesid], references: [idREDES])
 
     centroId          Int
     centro            CENTRO @relation(fields: [centroId], references: [idCENTRO])
@@ -94,10 +81,13 @@ model RECOMENDACION {
 model ASPIRANTE {
   idASPIRANTE         Int     @id
   nombre_completo     String  @db.VarChar(50)
+  edad                Int     @default(0)
   email               String  @db.VarChar(50)
   telefono            String  @db.VarChar(10)
-  barrio              String?  @db.VarChar(100)
-  direccion           String?  @db.VarChar(100)
+  barrio              String  @db.VarChar(100)
+  direccion           String  @db.VarChar(100)
+  ocupacion           String  
+  institucion         String
   activo              Boolean  @default(true)
   password            String 
   foto                String? 
@@ -110,7 +100,7 @@ model ASPIRANTE {
 
 model TEST {
   idTEST              Int     @id @default(autoincrement())
-  nombre              String?
+  nombre              String
   descripcion         String  @db.VarChar(500)
 
     reporte           REPORTE[]

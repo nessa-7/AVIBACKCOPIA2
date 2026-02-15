@@ -11,18 +11,27 @@ const AspiranteController = {
         res.json({ message: 'Aspirante eliminado' });
     },
 
-    async actualizar(req, res) {
-    
-      const { id } = req.params;
-      const datos = req.body; // Campos a actualizar
+    async actualizarAspirante(req, res) {
+    const { id } = req.params;
+    const datos = req.body;
+    const aspiranteActualizado = await AspiranteService.actualizarAspirante(id, datos);
+    res.json({
+      message: "Aspirante actualizado correctamente",
+      data: aspiranteActualizado
+    });
+  },
 
-      const aspiranteActualizado = await AspiranteService.actualizarAspirante(id, datos);
+  async cambiarEstadoAspirante(req, res) {
+    const { id } = req.params;
+    const { activo } = req.body;
+    const aspiranteActualizado = await AspiranteService.cambiarEstadoAspirante(id, activo);
+    res.json({
+      message: "Estado del aspirante actualizado correctamente",
+      data: aspiranteActualizado
+    });
+  }
 
-      res.json({
-        message: "Aspirante actualizado correctamente",
-        data: aspiranteActualizado
-      });
-    }
+  
 }
 module.exports = AspiranteController;
 

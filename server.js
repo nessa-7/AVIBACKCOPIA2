@@ -3,11 +3,12 @@ const app = express()
 const authRoutes = require("./routes/authRoutes")
 const PreguntasRoutes = require("./routes/PreguntasRouter")
 const RespuestaRoutes = require("./routes/RespuestaRouter")
-const ProgramasRoutes = require("./routes/ProgramasRoutes")
+const ProgramasRoutes = require("./routes/ProgramasRouter")
 const PerfilRoutes = require("./routes/PerfilRoutes")
 const AspiranteRoutes = require("./routes/AspiranteRoutes")
 const AdminRoutes = require("./routes/AdminRoutes")
 const EstadisticasRoutes = require("./routes/EstadisticasRouter")
+const CentrosRoutes = require("./routes/CentroRoutes")
 
 const cors = require("cors")
 const bcrypt = require("bcryptjs")
@@ -17,12 +18,12 @@ const prisma = new PrismaClient()
 
 app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'DELETE', 'PATCH'],
+    methods: ['GET', 'POST', 'DELETE', 'PATCH', 'PUT'],
     allowedHeaders: ['Content-Type','Authorization']
 }));
 
 app.use(express.json())
-app.use('/api',authRoutes,PreguntasRoutes,RespuestaRoutes,ProgramasRoutes,PerfilRoutes,AspiranteRoutes,AdminRoutes, EstadisticasRoutes)
+app.use('/api',authRoutes,PreguntasRoutes,RespuestaRoutes,ProgramasRoutes,PerfilRoutes,AspiranteRoutes,AdminRoutes, EstadisticasRoutes, CentrosRoutes)
 
 
 
