@@ -81,7 +81,7 @@ model RECOMENDACION {
 model ASPIRANTE {
   idASPIRANTE         Int     @id
   nombre_completo     String  @db.VarChar(50)
-  edad                Int     @default(0)
+  fechaNacimiento     DateTime @db.Date
   email               String  @db.VarChar(50)
   telefono            String  @db.VarChar(10)
   barrio              String  @db.VarChar(100)
