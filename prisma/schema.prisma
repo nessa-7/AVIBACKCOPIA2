@@ -51,7 +51,7 @@ model PROGRAMA {
   idPROGRAMA          Int      @id @default(autoincrement())
   nivel               String   @db.VarChar(50)
   nombre              String   @db.VarChar(50)
-  descripcion         String   @db.VarChar(500)
+  descripcion         String   @db.Text
   activo              Boolean @default(true)
 
 

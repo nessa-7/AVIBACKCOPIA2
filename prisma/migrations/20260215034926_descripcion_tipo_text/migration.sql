@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `PROGRAMA` MODIFY `descripcion` TEXT NOT NULL;
