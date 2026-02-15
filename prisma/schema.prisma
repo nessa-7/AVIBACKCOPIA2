@@ -87,7 +87,7 @@ model ASPIRANTE {
   barrio              String  @db.VarChar(100)
   direccion           String  @db.VarChar(100)
   ocupacion           String  
-  institucion         String
+  institucion         String? 
   activo              Boolean  @default(true)
   password            String 
   foto                String? 
