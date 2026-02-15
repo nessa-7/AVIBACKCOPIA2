@@ -8,16 +8,46 @@ const jwt = require("jsonwebtoken")
 const authService = {
 
     async registeraspirante(data){
-        const {idASPIRANTE,nombre_completo,email,telefono,barrio,direccion,password}=data
+        const {
+            idASPIRANTE,
+            nombre_completo,
+            fechaNacimiento,
+            email,
+            telefono,
+            barrio,
+            direccion,
+            ocupacion,
+            institucion,
+            password
+        } = data;
 
-        //encriptar password
-        const datoencriptado = await bcrypt.hash(password,10)
-        const nuevoaspirante = await prisma.aSPIRANTE.create({data:
-            {idASPIRANTE,nombre_completo,email,telefono,barrio,direccion,password:datoencriptado}
-        })
+        // 🔐 Validación backend importante
+        if (
+            (ocupacion === "Colegio" || ocupacion === "Universidad") &&
+            !institucion
+        ) {
+            throw new Error("La institución es obligatoria si el aspirante estudia");
+        }
 
-        return nuevoaspirante
-    },
+        const datoencriptado = await bcrypt.hash(password, 10);
+
+        const nuevoaspirante = await prisma.aSPIRANTE.create({
+            data: {
+            idASPIRANTE,
+            nombre_completo,
+            fechaNacimiento: new Date(fechaNacimiento),
+            email,
+            telefono,
+            barrio,
+            direccion,
+            ocupacion,
+            institucion: institucion || null,
+            password: datoencriptado
+            }
+        });
+
+        return nuevoaspirante;
+        },
 
     //REGISTRO ADMIN
     
