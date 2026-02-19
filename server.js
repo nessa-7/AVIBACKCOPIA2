@@ -9,6 +9,7 @@ const AspiranteRoutes = require("./routes/AspiranteRoutes")
 const AdminRoutes = require("./routes/AdminRoutes")
 const EstadisticasRoutes = require("./routes/EstadisticasRouter")
 const CentrosRoutes = require("./routes/CentroRoutes")
+const TestRoutes = require("./routes/TestRoutes")
 
 const cors = require("cors")
 const bcrypt = require("bcryptjs")
@@ -24,6 +25,7 @@ app.use(cors({
 
 app.use(express.json())
 app.use('/api',authRoutes,PreguntasRoutes,RespuestaRoutes,ProgramasRoutes,PerfilRoutes,AspiranteRoutes,AdminRoutes, EstadisticasRoutes, CentrosRoutes)
+app.use('/api/test',TestRoutes)
 
 
 

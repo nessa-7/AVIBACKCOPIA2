@@ -85,7 +85,7 @@ const authService = {
                  process.env.JWT_SECRET,
                 { expiresIn: "2h"}
             )
-            return {user: aspirante, token, rol: "aspirante"}
+            return {user: aspirante, token, rol: "aspirante", id: aspirante.idASPIRANTE}
         }
 
         return null
