@@ -56,6 +56,8 @@ model PROGRAMA {
 
 
     recomendaciones   RECOMENDACION[]
+    
+    aprendices        APRENDIZ[]
 
     centroId          Int
     centro            CENTRO @relation(fields: [centroId], references: [idCENTRO])
@@ -150,7 +152,8 @@ model PREGUNTAS {
 model RESPUESTAS_ASPIRANTE {
   idRESPUESTASASP     Int      @id @default(autoincrement())
 
-  valor               Int
+  valor               Int?
+  texto               String?   @db.Text
 
     aspiranteId       Int
     aspirante         ASPIRANTE @relation(fields: [aspiranteId], references: [idASPIRANTE])
@@ -160,4 +163,16 @@ model RESPUESTAS_ASPIRANTE {
 
     reporteId         Int
     reporte           REPORTE @relation(fields: [reporteId], references: [idREPORTE])
+}
+
+
+model APRENDIZ {
+  idAPRENDIZ          Int     @id 
+  tipoDocumento       String   @db.VarChar(50)
+  nombre              String   @db.VarChar(100)
+  apellidos           String   @db.VarChar(100)
+  estado              Boolean  @default(true)
+
+  programaId          Int
+  programa            PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
 }

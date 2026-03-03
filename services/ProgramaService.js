@@ -28,6 +28,18 @@ const ProgramaService = {
         activo
       }
     });
+  },
+
+   async editarPrograma(id, data) { 
+    return await prisma.pROGRAMA.update({
+      where: { idPROGRAMA: Number(id) },
+      data: {
+        nombre: data.nombre,
+        nivel: data.nivel,
+        descripcion: data.descripcion,
+        centroId: data.centroId
+      }
+    });
   }
 };
 

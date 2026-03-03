@@ -8,4 +8,6 @@ router.post('/programas', ProgramasController.crearPrograma);
 
 router.put('/programas/:id/estado', ProgramasController.cambiarEstado);
 
+router.put('/programas/:id', ProgramasController.editarPrograma);
+
 module.exports = router;

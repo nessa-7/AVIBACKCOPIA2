@@ -18,6 +18,13 @@ const AdminService = {
       where: { idADMIN: Number(idADMIN) },
       data: { activo: nuevoEstado }
     });
+  },
+
+  async subirFotoAdmin(idADMIN, fotoUrl) {
+    return await prisma.aDMIN.update({
+      where: { idADMIN: Number(idADMIN) },
+      data: { foto: fotoUrl }
+    });
   }
 };
 

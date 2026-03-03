@@ -18,8 +18,15 @@ const ProgramasController = {
 
     const programa = await ProgramasService.cambiarEstado(id, activo);
     res.json(programa);
+  },
+  
+  async editarPrograma(req, res) {
+    const { id } = req.params;
+    const data = req.body;
+    const programa = await ProgramasService.editarPrograma(id, data);
+    res.json(programa);
   }
-
+  
 };
 
 module.exports = ProgramasController;
