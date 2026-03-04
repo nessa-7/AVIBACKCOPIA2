@@ -6,115 +6,178 @@ const IA_URL = process.env.IA_URL || "http://localhost:8000";
 const TestService = {
 
 //preguntas pretest
-    async analyzePretest(aspiranteId, answers, session_id) {
 
-    const response = await fetch(`${IA_URL}/analyze-pretest`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-        answers,
-        session_id
-        })
-    });
+async analyzePretest(reporteId, aspiranteId, answers, session_id) {
 
-    const data = await response.json();
+  if(!answers || answers.length !== 5){
+    throw new Error("Pretest incompleto");
+  }
 
-    const reporte = await prisma.rEPORTE.create({
-        data: {
-            aspirante:{
-                 connect: { idASPIRANTE: aspiranteId }
-            },
-            test: {
-                connect: { idTEST: 2 }
-            },
-            puntajeR: data.scores.R,
-            puntajeI: data.scores.I,
-            puntajeA: data.scores.A,
-            puntajeS: data.scores.S,
-            puntajeE: data.scores.E,
-            puntajeC: data.scores.C
-        }
-    });
+  // Guardar respuestas del pretest
+  for(let i=0; i<answers.length; i++){
 
-    return {
-        session_id, 
-        reporteId: reporte.idREPORTE,
-        scores: data.scores,
-        summary: data.summary
-    };
-    },
+    await prisma.rESPUESTAS_ASPIRANTE.create({
+      data:{
 
-    
-  //Iniciar test
-  async startTest(aspiranteId) {
+        texto: answers[i],
+        valor: null,
 
-    const reporte = await prisma.rEPORTE.create({
-        data: {
         aspirante:{
-                 connect: { idASPIRANTE: aspiranteId }
+          connect:{ idASPIRANTE: aspiranteId }
         },
-        test: {
-            connect: { idTEST: 1 } 
+
+        pregunta:{
+          connect:{ idPREGUNTAS: i + 1 }
+        },
+
+        reporte:{
+          connect:{ idREPORTE: reporteId }
         }
-        }
-    });
 
-    return reporte;
-    },
-
-
-  //Obtener siguiente pregunta desde IA y guardarla
-  async nextQuestion(testId, riasec_scores, session_id) {
-
-    const response = await fetch(`${IA_URL}/next-question`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        session_id,
-        riasec_scores
-      })
-    });
-
-    const data = await response.json();
-
-    // Guardar pregunta en BD
-    const preguntaGuardada = await prisma.pREGUNTAS.create({
-      data: {
-        descripcion: data.question,
-        perfilesRIASEC: data.category,
-        generadaIA: true,
-        testId: testId
       }
     });
 
-    return preguntaGuardada;
-  },
+  }
+
+
+  // IA
+  const response = await fetch(`${IA_URL}/analyze-pretest`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      answers,
+      session_id
+    })
+  });
+
+  const data = await response.json();
+
+
+  // Guardar puntajes iniciales
+  await prisma.rEPORTE.update({
+    where:{
+      idREPORTE: reporteId
+    },
+    data:{
+      puntajeR: data.scores.R,
+      puntajeI: data.scores.I,
+      puntajeA: data.scores.A,
+      puntajeS: data.scores.S,
+      puntajeE: data.scores.E,
+      puntajeC: data.scores.C
+    }
+  });
+
+  return{
+    session_id,
+    reporteId,
+    scores:data.scores,
+    summary:data.summary
+  };
+
+},
+
+
+
+  
+    
+  //Iniciar test
+
+async startTest(aspiranteId) {
+
+  if(!aspiranteId){
+    throw new Error("aspiranteId requerido");
+  }
+
+  const reporteNuevo = await prisma.rEPORTE.create({
+    data:{
+      aspirante:{
+        connect:{ idASPIRANTE: aspiranteId }
+      },
+      test:{
+        connect:{ idTEST:1 }
+      }
+    }
+  });
+
+  console.log("⭐ Reporte creado:", reporteNuevo.idREPORTE);
+
+  return{
+    reporteId: reporteNuevo.idREPORTE,
+    testId:1
+  };
+
+},
+
+  //Obtener siguiente pregunta desde IA y guardarla
+async nextQuestion(testId, riasec_scores, session_id) {
+
+  const response = await fetch(`${IA_URL}/next-question`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      session_id,
+      riasec_scores
+    })
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.log("ERROR IA:", text);
+    throw new Error("IA no respondió correctamente");
+  }
+
+  const data = await response.json();
+
+  if (!data.question || !data.category) {
+    throw new Error("IA devolvió datos incompletos");
+  }
+
+  const preguntaGuardada = await prisma.pREGUNTAS.create({
+    data: {
+      descripcion: data.question,
+      perfilesRIASEC: data.category,
+      generadaIA: true,
+      testId: testId
+    }
+  });
+
+  return preguntaGuardada;
+},
 
 
   //Guardar respuesta del aspirante
-  async saveAnswer({ aspiranteId, preguntaId, valor, reporteId }) {
+  async saveAnswer({ aspiranteId, preguntaId, valor, texto, reporteId }) {
 
-    const respuesta = await prisma.rESPUESTAS_ASPIRANTE.create({
-        data: {
-        valor,
-        aspirante: {
-            connect: { idASPIRANTE: aspiranteId }
-        },
-        pregunta: {
-            connect: { idPREGUNTAS: preguntaId }
-        },
-        reporte: {
-            connect: { idREPORTE: reporteId }
-        }
-        }
-    });
+  if(!reporteId){
+    throw new Error("reporteId es obligatorio");
+  }
 
-    return respuesta;
+  const respuesta = await prisma.rESPUESTAS_ASPIRANTE.create({
+  data:{
+    valor: valor ?? null,
+    texto: texto ?? null,
+
+    aspirante:{
+      connect:{ idASPIRANTE: aspiranteId }
     },
 
+    pregunta:{
+      connect:{ idPREGUNTAS: preguntaId }
+    },
 
+    reporte:{
+      connect:{ idREPORTE: reporteId }
+    }
+
+  }
+  });
+
+  return respuesta;
+
+  },
   //Calcular resultado final
 async finalizarTest(reporteId, riasec_scores) {
 

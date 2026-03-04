@@ -1,14 +1,23 @@
 const TestService = require("../services/TestService");
+const crypto = require("crypto");
 
 const TestController = {
 
     async pretest(req, res) {
     try {
-      const { aspiranteId, answers } = req.body;
+
+      const { aspiranteId, answers, reporteId } = req.body;
+
+      if(!aspiranteId || !answers){
+        return res.status(400).json({
+          error:"Datos incompletos"
+        });
+      }
 
       const session_id = crypto.randomUUID();
 
       const data = await TestService.analyzePretest(
+        reporteId,
         aspiranteId,
         answers,
         session_id
@@ -18,11 +27,10 @@ const TestController = {
 
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: "Error en pretest" });
+      res.status(500).json({
+        error: "Error en pretest"
+      });
     }
-
-
-    console.log(req.body);
   },
 
   // Iniciar test
@@ -42,21 +50,31 @@ const TestController = {
 
   // Siguiente pregunta
   async nextQuestion(req, res) {
-    try {
-      const { testId, riasec_scores, session_id } = req.body;
+  try {
 
-      const pregunta = await TestService.nextQuestion(
-        testId,
-        riasec_scores,
-        session_id
-      );
+    console.log("BODY:", req.body);
 
-      res.json(pregunta);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Error obteniendo pregunta" });
-    }
-  },
+    const { testId, riasec_scores, session_id } = req.body;
+
+    const pregunta = await TestService.nextQuestion(
+      testId,
+      riasec_scores,
+      session_id
+    );
+
+    res.json(pregunta);
+
+  } catch (error) {
+
+    console.error("ERROR NEXT QUESTION:");
+    console.error(error);
+
+    res.status(500).json({
+      error: error.message
+    });
+
+  }
+},
 
 
   // Guardar respuesta
