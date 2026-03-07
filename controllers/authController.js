@@ -2,15 +2,27 @@ const authService = require('../services/authService')
 
 const authController = {
     async registeraspirante(req,res){
-        const aspirantenuevo = await authService.registeraspirante(req.body)
-        res.json({mensaje:"Registro realizado", aspirantenuevo})
+        try {
+            const aspirantenuevo = await authService.registeraspirante(req.body)
+            res.json({mensaje:"Registro realizado", aspirantenuevo})
+        } catch (error) {
+            const mensaje = error?.message || "Error en el registro del aspirante"
+            const status = /existe|registrado|duplicados/i.test(mensaje) ? 409 : 400
+            res.status(status).json({ mensaje })
+        }
     },
 
      //REGISTRO ADMIN
     
     async registeradmin(req,res){
-        const adminnuevo = await authService.registeradmin(req.body)
-        res.json({ mensaje: "Admin registrado", adminnuevo })
+        try {
+            const adminnuevo = await authService.registeradmin(req.body)
+            res.json({ mensaje: "Admin registrado", adminnuevo })
+        } catch (error) {
+            const mensaje = error?.message || "Error en el registro del admin"
+            const status = /existe|registrado|duplicados/i.test(mensaje) ? 409 : 400
+            res.status(status).json({ mensaje })
+        }
     },
 
     

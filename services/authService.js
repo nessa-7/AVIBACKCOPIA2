@@ -5,6 +5,35 @@ const bcrypt = require("bcryptjs")
 
 const jwt = require("jsonwebtoken")
 
+function parseFechaNacimiento(fechaNacimiento) {
+    if (!fechaNacimiento) return null;
+
+    if (fechaNacimiento instanceof Date && !Number.isNaN(fechaNacimiento.getTime())) {
+        return fechaNacimiento;
+    }
+
+    const raw = String(fechaNacimiento).trim();
+    if (!raw) return null;
+
+    // yyyy-mm-dd
+    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(raw)) {
+        const [y, m, d] = raw.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    // dd/mm/yyyy o d/m/yyyy
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(raw)) {
+        const [d, m, y] = raw.split("/").map(Number);
+        const dt = new Date(y, m - 1, d);
+        return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+
+    // fallback
+    const dt = new Date(raw);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
 const authService = {
 
     async registeraspirante(data){
@@ -29,24 +58,52 @@ const authService = {
             throw new Error("La institución es obligatoria si el aspirante estudia");
         }
 
+        const fecha = parseFechaNacimiento(fechaNacimiento);
+        if (!fecha) {
+            throw new Error("La fecha de nacimiento no es valida");
+        }
+
+        const correoExistente = await prisma.aSPIRANTE.findFirst({
+            where: { email }
+        });
+        if (correoExistente) {
+            throw new Error("El correo ya esta registrado");
+        }
+
         const datoencriptado = await bcrypt.hash(password, 10);
 
-        const nuevoaspirante = await prisma.aSPIRANTE.create({
-            data: {
-            idASPIRANTE,
-            nombre_completo,
-            fechaNacimiento: new Date(fechaNacimiento),
-            email,
-            telefono,
-            barrio,
-            direccion,
-            ocupacion,
-            institucion: institucion || null,
-            password: datoencriptado
-            }
-        });
+        try {
+            const nuevoaspirante = await prisma.aSPIRANTE.create({
+                data: {
+                idASPIRANTE,
+                nombre_completo,
+                fechaNacimiento: fecha,
+                email,
+                telefono,
+                barrio,
+                direccion,
+                ocupacion,
+                institucion: institucion || null,
+                password: datoencriptado
+                }
+            });
 
-        return nuevoaspirante;
+            return nuevoaspirante;
+        } catch (error) {
+            if (error?.code === "P2002") {
+                const target = Array.isArray(error?.meta?.target)
+                    ? error.meta.target.join(", ")
+                    : String(error?.meta?.target || "");
+                if (target.includes("idASPIRANTE") || target.toUpperCase().includes("PRIMARY")) {
+                    throw new Error("El ID del aspirante ya existe");
+                }
+                if (target.includes("email")) {
+                    throw new Error("El correo ya esta registrado");
+                }
+                throw new Error("Ya existe un registro con datos duplicados");
+            }
+            throw error;
+        }
         },
 
     //REGISTRO ADMIN
@@ -56,14 +113,27 @@ const authService = {
 
     const passwordEncriptado = await bcrypt.hash(password, 10);
 
-    const nuevoAdmin = await prisma.aDMIN.create({
-        data: {
-            idADMIN,
-            nombre,
-            email,
-            password: passwordEncriptado
+    let nuevoAdmin;
+    try {
+        nuevoAdmin = await prisma.aDMIN.create({
+            data: {
+                idADMIN,
+                nombre,
+                email,
+                password: passwordEncriptado
+            }
+        });
+    } catch (error) {
+        if (error?.code === "P2002") {
+            const target = Array.isArray(error?.meta?.target)
+                ? error.meta.target.join(", ")
+                : String(error?.meta?.target || "");
+            if (target.includes("idADMIN")) throw new Error("El ID del admin ya existe");
+            if (target.includes("email")) throw new Error("El correo del admin ya existe");
+            throw new Error("Datos duplicados del administrador");
         }
-    });
+        throw error;
+    }
 
     return nuevoAdmin;
 },
@@ -108,7 +178,7 @@ const authService = {
                  process.env.JWT_SECRET,
                 { expiresIn: "2h"}
             )
-            return {user: admin, token, rol: "admin"}
+            return {user: admin, id: admin.idADMIN, nombre: admin.nombre, token, rol: "admin"}
         }
     }
 
