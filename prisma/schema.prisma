@@ -50,8 +50,10 @@ model AMBIENTE {
 model PROGRAMA {
   idPROGRAMA          Int      @id @default(autoincrement())
   nivel               String   @db.VarChar(50)
-  nombre              String   @db.VarChar(50)
+  nombre              String   @db.VarChar(100)
   descripcion         String   @db.Text
+  modalidad           String?   @db.Text
+  AR                  String?   @db.Text
   activo              Boolean @default(true)
 
 
@@ -172,6 +174,7 @@ model APRENDIZ {
   nombre              String   @db.VarChar(100)
   apellidos           String   @db.VarChar(100)
   estado              Boolean  @default(true)
+  horas_inasistidas   Int?      @default(0)
 
   programaId          Int
   programa            PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
