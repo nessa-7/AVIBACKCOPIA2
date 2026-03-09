@@ -72,6 +72,32 @@ const AdminController = {
       console.error("Error al actualizar perfil del admin:", error);
       res.status(500).json({ mensaje: "Error al actualizar el perfil" });
     }
+  },
+
+  async dashboardDesercion(req, res) {
+    try {
+      const datos = await DashboardService.desercionPorPrograma();
+      res.json(datos);
+    } catch (error) {
+      res.status(500).json({
+        message: "Error generando dashboard",
+        error: error.message
+      });
+    }
+  },
+
+  // Endpoint especial para Power BI: retorna tabla plana (una fila por aprendiz)
+  async powerbiDesercion(req, res) {
+    try {
+      const datos = await DashboardService.datosCompletosParaPowerBI();
+      res.json(datos);
+    } catch (error) {
+      console.error("Error generando datos Power BI:", error);
+      res.status(500).json({
+        message: "Error generando datos para Power BI",
+        error: error.message
+      });
+    }
   }
 };
 
