@@ -1,5 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
-const { predecirDesercion } = require("./IAService");
+const predecirDesercion = require("./IAService");
 
 const prisma = new PrismaClient();
 
@@ -183,4 +183,4 @@ async riesgoDesercionPorPrograma() {
 
 };
 
-module.exports = AprendizService;
+module.exports = AprendizService

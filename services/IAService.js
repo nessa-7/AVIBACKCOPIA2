@@ -1,16 +1,23 @@
-const axios = require("axios");
-
 const IA_Prediccion = process.env.IA_Prediccion || "http://localhost:8000";
 
 const predecirDesercion = async (aprendiz) => {
   try {
-
-    const response = await axios.post(IA_URL, {
-      programaId: aprendiz.programaId,
-      horas_inasistidas: aprendiz.horas_inasistidas
+    const response = await fetch(IA_Prediccion, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        programaId: aprendiz.programaId,
+        horas_inasistidas: aprendiz.horas_inasistidas
+      })
     });
 
-    return response.data;
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return await response.json();
 
   } catch (error) {
     console.error("Error IA:", error.message);
@@ -18,6 +25,4 @@ const predecirDesercion = async (aprendiz) => {
   }
 };
 
-module.exports = {
-  predecirDesercion
-};
+module.exports = predecirDesercion
