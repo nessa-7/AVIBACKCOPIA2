@@ -25,7 +25,8 @@ app.use(cors({
 }));
 
 app.use(express.json())
-app.use('/api',authRoutes,PreguntasRoutes,ProgramasRoutes,PerfilRoutes,AspiranteRoutes,AdminRoutes, EstadisticasRoutes, CentrosRoutes, ReportesRoutes, AprendizRoutes)
+
+app.use('/api', EstadisticasRoutes, CentrosRoutes, ReportesRoutes, authRoutes, PreguntasRoutes, AspiranteRoutes, ProgramasRoutes, PerfilRoutes, AdminRoutes, AprendizRoutes)
 app.use('/api/test',TestRoutes)
 
 
