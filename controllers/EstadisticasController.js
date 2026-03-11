@@ -56,6 +56,34 @@ const EstadisticasController = {
             data: programas
         })
         
+    },
+
+
+    async getTotalAspirantes(req, res) {
+        const total = await EstadisticasService.totalAspirantes();
+        res.json(total);
+    },
+
+    async getReportesCompletados(req, res) {
+        const total = await EstadisticasService.reportesCompletados();
+        res.json(total);
+    },
+
+
+    async getTestsCompletadosPorAspirante(req, res) {
+
+        const { id } = req.params;
+
+        const total = await EstadisticasService.testsCompletadosPorAspirante(id);
+
+        res.json(total);
+
+    },
+
+
+    async getAspirantesPorProgramaNivel(req, res) {
+    const datos = await EstadisticasService.aspirantesPorProgramaNivel();
+    res.json(datos);
     }
 
 

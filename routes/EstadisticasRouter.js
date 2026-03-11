@@ -8,4 +8,9 @@ router.get('/estadisticas/programas', EstadisticasController.getProgramasMasReco
 router.get('/estadisticas/programas/meses', EstadisticasController.getProgramaMes)
 router.get('/estadisticas/listarprogramas', EstadisticasController.getProgramas)
 
+router.get("/estadisticas/aspirante/contador", EstadisticasController.getTotalAspirantes)
+router.get("/estadisticas/tests-completados", EstadisticasController.getReportesCompletados);
+router.get("/estadisticas/aspirante/test/:id",EstadisticasController.getTestsCompletadosPorAspirante);
+router.get("/estadisticas/programas-nivel",EstadisticasController.getAspirantesPorProgramaNivel);
+
 module.exports = router

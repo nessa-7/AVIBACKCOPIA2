@@ -173,7 +173,100 @@ const EstadisticasService = {
             }
         })
 
-    }
+    },
+
+
+
+    async totalAspirantes() {
+        const total = await prisma.aSPIRANTE.count();
+        return { total };
+    },
+
+    async reportesCompletados() {
+        const total = await prisma.rEPORTE.count({
+            where: {
+            OR: [
+                { puntajeR: { gt: 0 } },
+                { puntajeI: { gt: 0 } },
+                { puntajeA: { gt: 0 } },
+                { puntajeS: { gt: 0 } },
+                { puntajeE: { gt: 0 } },
+                { puntajeC: { gt: 0 } }
+            ]
+            }
+        });
+    return { total };
+    },
+
+
+    async testsCompletadosPorAspirante(aspiranteId) {
+        const total = await prisma.rEPORTE.count({
+            where: {
+            aspiranteId: Number(aspiranteId),
+            NOT: {
+                puntajeR: 0,
+                puntajeI: 0,
+                puntajeA: 0,
+                puntajeS: 0,
+                puntajeE: 0,
+                puntajeC: 0
+            }
+            }
+        });
+    return { total };
+    },
+
+
+    async aspirantesPorProgramaNivel() {
+
+    const resultados = await prisma.rECOMENDACION.groupBy({
+        by: ["programaId"],
+        _count: {
+        programaId: true
+        }
+    });
+
+    const programas = await prisma.pROGRAMA.findMany({
+        where: {
+        idPROGRAMA: {
+            in: resultados.map(r => r.programaId)
+        }
+        },
+        select: {
+        idPROGRAMA: true,
+        nombre: true,
+        nivel: true
+        }
+    });
+
+    const tecnicos = [];
+    const tecnologos = [];
+
+    resultados.forEach(r => {
+
+        const programa = programas.find(p => p.idPROGRAMA === r.programaId);
+
+        if (!programa) return;
+
+        const data = {
+        programa: programa.nombre,
+        total: r._count.programaId
+        };
+
+        if (programa.nivel.toLowerCase().includes("técn")) {
+        tecnicos.push(data);
+        } else if (programa.nivel.toLowerCase().includes("tecnólog")) {
+        tecnologos.push(data);
+        }
+
+    });
+
+    return {
+        tecnicos,
+        tecnologos
+    };
+
+}
 
 
 
