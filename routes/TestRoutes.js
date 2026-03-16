@@ -9,4 +9,7 @@ router.post("/next-question", TestController.nextQuestion);
 router.post("/answer", TestController.saveAnswer);
 router.post("/finish", TestController.finalizar);
 
+router.post("/ranking", TestController.guardarRankings);
+router.get("/ranking-programas", TestController.rankingProgramas);
+
 module.exports = router;

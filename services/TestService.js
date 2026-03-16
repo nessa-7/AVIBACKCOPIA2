@@ -5,33 +5,30 @@ const IA_URL = process.env.IA_URL || "http://localhost:8000";
 
 const TestService = {
 
-//preguntas pretest
-
 async analyzePretest(reporteId, aspiranteId, answers, session_id) {
 
-  if(!answers || answers.length !== 5){
+  if (!answers || answers.length !== 5) {
     throw new Error("Pretest incompleto");
   }
 
-  // Guardar respuestas del pretest
-  for(let i=0; i<answers.length; i++){
+  for (let i = 0; i < answers.length; i++) {
 
     await prisma.rESPUESTAS_ASPIRANTE.create({
-      data:{
+      data: {
 
         texto: answers[i],
         valor: null,
 
-        aspirante:{
-          connect:{ idASPIRANTE: aspiranteId }
+        aspirante: {
+          connect: { idASPIRANTE: aspiranteId }
         },
 
-        pregunta:{
-          connect:{ idPREGUNTAS: i + 1 }
+        pregunta: {
+          connect: { idPREGUNTAS: i + 1 }
         },
 
-        reporte:{
-          connect:{ idREPORTE: reporteId }
+        reporte: {
+          connect: { idREPORTE: reporteId }
         }
 
       }
@@ -39,11 +36,9 @@ async analyzePretest(reporteId, aspiranteId, answers, session_id) {
 
   }
 
-
-  // IA
   const response = await fetch(`${IA_URL}/analyze-pretest`, {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       answers,
       session_id
@@ -52,13 +47,11 @@ async analyzePretest(reporteId, aspiranteId, answers, session_id) {
 
   const data = await response.json();
 
-
-  // Guardar puntajes iniciales
   await prisma.rEPORTE.update({
-    where:{
+    where: {
       idREPORTE: reporteId
     },
-    data:{
+    data: {
       puntajeR: data.scores.R,
       puntajeI: data.scores.I,
       puntajeA: data.scores.A,
@@ -68,48 +61,39 @@ async analyzePretest(reporteId, aspiranteId, answers, session_id) {
     }
   });
 
-  return{
+  return {
     session_id,
     reporteId,
-    scores:data.scores,
-    summary:data.summary
+    scores: data.scores,
+    summary: data.summary
   };
 
 },
 
-
-
-  
-    
-  //Iniciar test
-
 async startTest(aspiranteId) {
 
-  if(!aspiranteId){
+  if (!aspiranteId) {
     throw new Error("aspiranteId requerido");
   }
 
   const reporteNuevo = await prisma.rEPORTE.create({
-    data:{
-      aspirante:{
-        connect:{ idASPIRANTE: aspiranteId }
+    data: {
+      aspirante: {
+        connect: { idASPIRANTE: aspiranteId }
       },
-      test:{
-        connect:{ idTEST:1 }
+      test: {
+        connect: { idTEST: 1 }
       }
     }
   });
 
-  console.log("⭐ Reporte creado:", reporteNuevo.idREPORTE);
-
-  return{
+  return {
     reporteId: reporteNuevo.idREPORTE,
-    testId:1
+    testId: 1
   };
 
 },
 
-  //Obtener siguiente pregunta desde IA y guardarla
 async nextQuestion(testId, riasec_scores, session_id) {
 
   const response = await fetch(`${IA_URL}/next-question`, {
@@ -123,17 +107,7 @@ async nextQuestion(testId, riasec_scores, session_id) {
     })
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    console.log("ERROR IA:", text);
-    throw new Error("IA no respondió correctamente");
-  }
-
   const data = await response.json();
-
-  if (!data.question || !data.category) {
-    throw new Error("IA devolvió datos incompletos");
-  }
 
   const preguntaGuardada = await prisma.pREGUNTAS.create({
     data: {
@@ -145,43 +119,38 @@ async nextQuestion(testId, riasec_scores, session_id) {
   });
 
   return preguntaGuardada;
+
 },
 
-
-  //Guardar respuesta del aspirante
-  async saveAnswer({ aspiranteId, preguntaId, valor, texto, reporteId }) {
-
-  if(!reporteId){
-    throw new Error("reporteId es obligatorio");
-  }
+async saveAnswer({ aspiranteId, preguntaId, valor, texto, reporteId }) {
 
   const respuesta = await prisma.rESPUESTAS_ASPIRANTE.create({
-  data:{
-    valor: valor ?? null,
-    texto: texto ?? null,
+    data: {
 
-    aspirante:{
-      connect:{ idASPIRANTE: aspiranteId }
-    },
+      valor: valor ?? null,
+      texto: texto ?? null,
 
-    pregunta:{
-      connect:{ idPREGUNTAS: preguntaId }
-    },
+      aspirante: {
+        connect: { idASPIRANTE: aspiranteId }
+      },
 
-    reporte:{
-      connect:{ idREPORTE: reporteId }
+      pregunta: {
+        connect: { idPREGUNTAS: preguntaId }
+      },
+
+      reporte: {
+        connect: { idREPORTE: reporteId }
+      }
+
     }
-
-  }
   });
 
   return respuesta;
 
-  },
-  //Calcular resultado final
+},
+
 async finalizarTest(reporteId, riasec_scores) {
 
-  // Actualizar puntajes en el reporte
   const reporteActualizado = await prisma.rEPORTE.update({
     where: { idREPORTE: reporteId },
     data: {
@@ -194,7 +163,6 @@ async finalizarTest(reporteId, riasec_scores) {
     }
   });
 
-  // Llamar IA para recomendaciones
   const response = await fetch(`${IA_URL}/result`, {
     method: "POST",
     headers: {
@@ -203,20 +171,8 @@ async finalizarTest(reporteId, riasec_scores) {
     body: JSON.stringify(riasec_scores)
   });
 
-    let resultadoIA;
+  const resultadoIA = await response.json();
 
-        try {
-        resultadoIA = await response.json();
-        } catch (error) {
-        console.error("La IA no devolvió JSON válido");
-        throw new Error("Error en servicio IA");
-        }
-
-        if (!resultadoIA || !Array.isArray(resultadoIA.recommendations)) {
-        throw new Error("La IA no devolvió recomendaciones válidas");
-        }
-
-  //GUARDAR recomendaciones en la BD 
   for (const rec of resultadoIA.recommendations) {
 
     const programa = await prisma.pROGRAMA.findFirst({
@@ -224,24 +180,91 @@ async finalizarTest(reporteId, riasec_scores) {
     });
 
     if (programa) {
+
       await prisma.rECOMENDACION.create({
         data: {
           nombre: rec.name,
           descripcion: rec.reason,
+          ranking: null,
           programaId: programa.idPROGRAMA,
           reporteId
         }
       });
+
     }
+
   }
 
-  //Retornar todo
   return {
     reporte: reporteActualizado,
     resultadoIA
   };
-}
 
+},
+
+// guardar ranking de los 3 programas
+async guardarRankings(rankings) {
+
+  if (!Array.isArray(rankings)) {
+    throw new Error("Debe enviar un arreglo de rankings");
+  }
+
+  for (const r of rankings) {
+
+    await prisma.rECOMENDACION.update({
+      where: {
+        idRECOMENDACION: r.idRECOMENDACION
+      },
+      data: {
+        ranking: r.ranking
+      }
+    });
+
+  }
+
+  return { message: "Rankings guardados correctamente" };
+
+},
+
+// obtener puntaje total por programa
+async obtenerRankingProgramas() {
+
+  const ranking = await prisma.rECOMENDACION.groupBy({
+    by: ["programaId"],
+    _sum: {
+      ranking: true
+    },
+    orderBy: {
+      _sum: {
+        ranking: "desc"
+      }
+    }
+  });
+
+  const resultado = [];
+
+  for (const r of ranking) {
+
+    const programa = await prisma.pROGRAMA.findUnique({
+      where: {
+        idPROGRAMA: r.programaId
+      },
+      select: {
+        nombre: true
+      }
+    });
+
+    resultado.push({
+      programaId: r.programaId,
+      nombre: programa?.nombre || "Programa desconocido",
+      puntajeTotal: r._sum.ranking ?? 0
+    });
+
+  }
+
+  return resultado;
+
+}
 };
 
 module.exports = TestService;

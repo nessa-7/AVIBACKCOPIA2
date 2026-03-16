@@ -72,6 +72,7 @@ model RECOMENDACION {
   idRECOMENDACION     Int      @id @default(autoincrement())
   nombre              String   @db.VarChar(50)
   descripcion         String   @db.VarChar(500)
+  ranking             Int?
 
     programaId        Int
     programa          PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
@@ -178,18 +179,4 @@ model APRENDIZ {
 
   programaId          Int
   programa            PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
-
-  predicciones        PREDICCION_DESERCION[]
-}
-
-
-
-model PREDICCION_DESERCION {
-  idPREDICCION        Int      @id @default(autoincrement())
-  probabilidad        Float?
-  riesgo              String   @db.VarChar(100)
-  fecha               DateTime @default(now())
-
-  aprendizId          Int
-  aprendiz            APRENDIZ @relation(fields: [aprendizId], references: [idAPRENDIZ])
 }
