@@ -176,12 +176,16 @@ async finalizarTest(reporteId, riasec_scores) {
   for (const rec of resultadoIA.recommendations) {
 
     const programa = await prisma.pROGRAMA.findFirst({
-      where: { nombre: rec.name }
+      where: { 
+        nombre: {
+          contains: rec.name,
+        }
+      }
     });
 
     if (programa) {
 
-      await prisma.rECOMENDACION.create({
+      const nuevaRecomendacion = await prisma.rECOMENDACION.create({
         data: {
           nombre: rec.name,
           descripcion: rec.reason,
@@ -191,6 +195,10 @@ async finalizarTest(reporteId, riasec_scores) {
         }
       });
 
+      rec.AR = programa.AR;
+      rec.idRECOMENDACION = nuevaRecomendacion.idRECOMENDACION;
+      rec.programaId = programa.idPROGRAMA;
+      rec.reporteId = reporteId;
     }
 
   }
@@ -210,16 +218,83 @@ async guardarRankings(rankings) {
   }
 
   for (const r of rankings) {
+    console.log('guardarRankings r=', JSON.stringify(r));
 
-    await prisma.rECOMENDACION.update({
-      where: {
-        idRECOMENDACION: r.idRECOMENDACION
-      },
-      data: {
-        ranking: r.ranking
+    const maybeId = Number(r.idRECOMENDACION);
+    if (!Number.isNaN(maybeId) && Number.isInteger(maybeId) && maybeId > 0) {
+      try {
+        await prisma.rECOMENDACION.update({
+          where: { idRECOMENDACION: maybeId },
+          data: { ranking: r.ranking },
+        });
+        continue;
+      } catch (error) {
+        if (error.code !== 'P2025') throw error;
+        console.warn(`No se encontró RECOMENDACION id=${maybeId}, intentando fallback...`);
       }
-    });
+    }
 
+    if (r.idRECOMENDACION != null && (Number.isNaN(maybeId) || !Number.isInteger(maybeId) || maybeId <= 0)) {
+      console.warn('idRECOMENDACION proporcionado inválido', r.idRECOMENDACION);
+    }
+
+    // Fallback 1: programaId + reporteId
+    if (r.programaId && r.reporteId) {
+      let existing = await prisma.rECOMENDACION.findFirst({
+        where: {
+          programaId: r.programaId,
+          reporteId: r.reporteId,
+        },
+      });
+
+      if (existing) {
+        await prisma.rECOMENDACION.update({
+          where: { idRECOMENDACION: existing.idRECOMENDACION },
+          data: { ranking: r.ranking },
+        });
+      } else {
+        existing = await prisma.rECOMENDACION.create({
+          data: {
+            nombre: r.nombre || `Programa ${r.programaId}`,
+            descripcion: r.descripcion || "Ranking asignado manualmente",
+            ranking: r.ranking,
+            programaId: r.programaId,
+            reporteId: r.reporteId,
+          },
+        });
+      }
+      continue;
+    }
+
+    // Fallback 2: nombre + reporteId
+    if (r.nombre && r.reporteId) {
+      let existing = await prisma.rECOMENDACION.findFirst({
+        where: {
+          nombre: r.nombre,
+          reporteId: r.reporteId,
+        },
+      });
+
+      if (existing) {
+        await prisma.rECOMENDACION.update({
+          where: { idRECOMENDACION: existing.idRECOMENDACION },
+          data: { ranking: r.ranking },
+        });
+      } else {
+        await prisma.rECOMENDACION.create({
+          data: {
+            nombre: r.nombre,
+            descripcion: r.descripcion || "Ranking asignado manualmente",
+            ranking: r.ranking,
+            programaId: r.programaId || 0,
+            reporteId: r.reporteId,
+          },
+        });
+      }
+      continue;
+    }
+
+    throw new Error("Datos de ranking incompletos: falta idRECOMENDACION o programaId/reporteId o nombre/reporteId");
   }
 
   return { message: "Rankings guardados correctamente" };
