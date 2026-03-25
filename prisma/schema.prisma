@@ -123,6 +123,7 @@ model REPORTE {
   puntajeS            Int      @default(0)
   puntajeE            Int      @default(0)
   puntajeC            Int      @default(0)
+  explicacion         String?  @db.Text
 
 
     testId            Int  

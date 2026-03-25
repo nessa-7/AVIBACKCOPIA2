@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `REPORTE` ADD COLUMN `explicacion` VARCHAR(191) NULL;

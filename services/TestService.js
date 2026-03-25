@@ -173,6 +173,13 @@ async finalizarTest(reporteId, riasec_scores) {
 
   const resultadoIA = await response.json();
 
+  await prisma.rEPORTE.update({
+    where: { idREPORTE: reporteId },
+    data: {
+      explicacion: resultadoIA.explanation
+    }
+  });
+
   for (const rec of resultadoIA.recommendations) {
 
     const programa = await prisma.pROGRAMA.findFirst({
@@ -202,6 +209,7 @@ async finalizarTest(reporteId, riasec_scores) {
     }
 
   }
+  console.log("resultadoIA:", resultadoIA);
 
   return {
     reporte: reporteActualizado,
