@@ -60,6 +60,7 @@ model PROGRAMA {
     recomendaciones   RECOMENDACION[]
     
     aprendices        APRENDIZ[]
+    prediccionesDemanda PREDICCION_DEMANDA[]
 
     centroId          Int
     centro            CENTRO @relation(fields: [centroId], references: [idCENTRO])
@@ -99,6 +100,18 @@ model ASPIRANTE {
 
     reportes          REPORTE[]
     respuestas_Asp    RESPUESTAS_ASPIRANTE[]
+}
+
+
+
+// ── OTP / Verificación Email (Brevo) ─────────────────────────────────────────
+model CODIGO_VERIFICACION {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(100)
+  codigo    String   @db.VarChar(6)
+  datos     Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 
@@ -170,14 +183,48 @@ model RESPUESTAS_ASPIRANTE {
 }
 
 
-model APRENDIZ {
-  idAPRENDIZ          Int     @id 
-  tipoDocumento       String   @db.VarChar(50)
-  nombre              String   @db.VarChar(100)
-  apellidos           String   @db.VarChar(100)
-  estado              Boolean  @default(true)
-  horas_inasistidas   Int?      @default(0)
 
-  programaId          Int
-  programa            PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
+// ── APRENDIZ (estado como String para deserción análisis) ─────────────────────
+model APRENDIZ {
+  idAPRENDIZ Int @id
+
+  tipoDocumento String @db.VarChar(50)
+  nombre        String @db.VarChar(100)
+  apellidos     String @db.VarChar(100)
+
+  estado            String  @default("en formacion") @db.VarChar(50)
+  horas_inasistidas Int?    @default(0)
+  fechaIngreso      DateTime @default(now())
+
+  programaId Int
+  programa   PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
+
+  predicciones PREDICCION_DESERCION[]
+}
+
+
+// ── PREDICCION_DESERCION ──────────────────────────────────────────────────────
+model PREDICCION_DESERCION {
+  idPREDICCION Int      @id @default(autoincrement())
+  fecha        DateTime @default(now())
+  riesgo       String   @db.VarChar(50)
+  probabilidad Float?
+
+  aprendizId Int
+  aprendiz   APRENDIZ @relation(fields: [aprendizId], references: [idAPRENDIZ])
+}
+
+
+// ── PREDICCION_DEMANDA (Power BI / Fabric) ────────────────────────────────────
+model PREDICCION_DEMANDA {
+  idPREDICCION        Int      @id @default(autoincrement())
+  fecha               DateTime @default(now())
+  demanda             Float
+  tendencia           String   @db.VarChar(20)
+  confianza_prediccion Float    @default(0)
+  trimestre_objetivo   String   @db.VarChar(20)
+  accion_sugerida      String   @db.VarChar(20)
+
+  programaId Int
+  programa   PROGRAMA @relation(fields: [programaId], references: [idPROGRAMA])
 }
