@@ -103,19 +103,6 @@ model ASPIRANTE {
 }
 
 
-
-// ── OTP / Verificación Email (Brevo) ─────────────────────────────────────────
-model CODIGO_VERIFICACION {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique @db.VarChar(100)
-  codigo    String   @db.VarChar(6)
-  datos     Json
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
-
-
 model TEST {
   idTEST              Int     @id @default(autoincrement())
   nombre              String
